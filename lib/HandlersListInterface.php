@@ -25,6 +25,22 @@ interface HandlersListInterface extends \Countable, \Iterator
     public function contains(HandlerInterface $handler): bool;
 
     /**
+     * Filter list of handlers using given test function
+     *
+     * @param callable $test Test function should accept HandlerInterface as single argument and return boolean
+     * @return HandlerInterface[]
+     */
+    public function filter(callable $test): array;
+
+    /**
+     * Find handler by reducing list of available handlers using given test function
+     *
+     * @param callable $test Test function should accept HandlerInterface as single argument and return boolean
+     * @return HandlerInterface|null
+     */
+    public function find(callable $test): ?HandlerInterface;
+
+    /**
      * @param HandlerInterface[] $handlers
      * @return HandlersListInterface
      */

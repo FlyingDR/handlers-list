@@ -72,27 +72,26 @@ class HandlersListTest extends TestCase
         $this->assertEquals(0, $list->count());
         $this->assertEquals([], $list->toArray());
 
-        $items = [
-            new A(),
-            new B(),
-        ];
+        $a = new A();
+        $b = new B();
+        $items = [$a, $b];
         $list->set($items);
         $this->assertFalse($list->isEmpty());
         $this->assertEquals(2, $list->count());
         $this->assertEquals($items, $list->toArray());
 
-        $additional = new C();
+        $c = new C();
         $this->assertTrue($list->contains($items[0]));
-        $this->assertFalse($list->contains($additional));
+        $this->assertFalse($list->contains($c));
 
-        $list->remove($additional);
+        $list->remove($c);
         $this->assertEquals(2, $list->count());
         $this->assertTrue($list->contains($items[0]));
         $this->assertTrue($list->contains($items[1]));
 
-        $list->add($additional);
+        $list->add($c);
         $this->assertEquals(3, $list->count());
-        $this->assertTrue($list->contains($additional));
+        $this->assertTrue($list->contains($c));
 
         $list->remove($items[0]);
         $this->assertEquals(2, $list->count());
@@ -102,6 +101,29 @@ class HandlersListTest extends TestCase
         $this->assertTrue($list->isEmpty());
         $this->assertEquals(0, $list->count());
         $this->assertEquals([], $list->toArray());
+
+        $list->set([$a, $b, $c]);
+        $test1 = function ($h) {
+            return $h instanceof A;
+        };
+        $test2 = function ($h) {
+            return $h instanceof B || $h instanceof C;
+        };
+        $test3 = function () {
+            return true;
+        };
+        $test4 = function () {
+            return false;
+        };
+        $this->assertEquals([$a], $list->filter($test1));
+        $this->assertEquals([$b, $c], $list->filter($test2));
+        $this->assertEquals([$a, $b, $c], $list->filter($test3));
+        $this->assertEquals([], $list->filter($test4));
+
+        $this->assertEquals($a, $list->find($test1));
+        $this->assertEquals($b, $list->find($test2));
+        $this->assertEquals($a, $list->find($test3));
+        $this->assertEquals(null, $list->find($test4));
     }
 
     public function testListIsIterable(): void

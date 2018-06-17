@@ -58,6 +58,33 @@ class HandlersList implements HandlersListInterface
     }
 
     /**
+     * Filter list of handlers using given test function
+     *
+     * @param callable $test Test function should accept HandlerInterface as single argument and return boolean
+     * @return HandlerInterface[]
+     */
+    public function filter(callable $test): array
+    {
+        return array_values(array_filter($this->handlers, $test));
+    }
+
+    /**
+     * Find handler by reducing list of available handlers using given test function
+     *
+     * @param callable $test Test function should accept HandlerInterface as single argument and return boolean
+     * @return HandlerInterface|null
+     */
+    public function find(callable $test): ?HandlerInterface
+    {
+        return array_reduce($this->handlers, function ($found, $current) use ($test) {
+            if ($found !== null) {
+                return $found;
+            }
+            return $test($current) ? $current : null;
+        });
+    }
+
+    /**
      * @param HandlerInterface[] $handlers
      * @return HandlersListInterface
      */
