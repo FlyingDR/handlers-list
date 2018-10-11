@@ -37,6 +37,28 @@ class HandlersList implements HandlersListInterface
     }
 
     /**
+     * Test if this handlers list will accept instances of given class
+     *
+     * @param object|string $class
+     * @return bool
+     */
+    public function accepts($class): bool
+    {
+        if (\is_object($class)) {
+            return \is_a($class, $this->interface, true);
+        }
+        if (\is_string($class)) {
+            try {
+                return (new \ReflectionClass($class))->implementsInterface($this->interface);
+            } catch (\ReflectionException $e) {
+                return false;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Checks if there is any handlers in list
      *
      * @return boolean

@@ -10,6 +10,14 @@ use Flying\HandlersList\Handler\HandlerInterface;
 interface HandlersListInterface extends \Countable, \Iterator
 {
     /**
+     * Test if this handlers list will accept instances of given class
+     *
+     * @param object|string $class
+     * @return bool
+     */
+    public function accepts($class): bool;
+
+    /**
      * Checks if there is any handlers in list
      *
      * @return boolean

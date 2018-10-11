@@ -65,6 +65,90 @@ class HandlersListTest extends TestCase
         ];
     }
 
+    /**
+     * @param string $interface
+     * @param string $class
+     * @param boolean $acceptable
+     * @dataProvider acceptanceItems
+     */
+    public function testClassAcceptance($interface, $class, $acceptable): void
+    {
+        $list = new HandlersList([], $interface);
+        $this->assertEquals($acceptable, $list->accepts($class));
+    }
+
+
+    public function acceptanceItems(): array
+    {
+        return [
+            [
+                AInterface::class,
+                A::class,
+                true,
+            ],
+            [
+                BInterface::class,
+                B::class,
+                true,
+            ],
+            [
+                AInterface::class,
+                B::class,
+                false,
+            ],
+            [
+                null,
+                A::class,
+                true,
+            ],
+            [
+                null,
+                B::class,
+                true,
+            ],
+            [
+                AInterface::class,
+                new A(),
+                true,
+            ],
+            [
+                AInterface::class,
+                new B(),
+                false,
+            ],
+            [
+                null,
+                new A(),
+                true,
+            ],
+            [
+                null,
+                null,
+                false,
+            ],
+            [
+                null,
+                true,
+                false,
+            ],
+            [
+                null,
+                [],
+                false,
+            ],
+            [
+                null,
+                42,
+                false,
+            ],
+            [
+                null,
+                'test',
+                false,
+            ],
+        ];
+    }
+
     public function testListManipulations(): void
     {
         $list = new HandlersList();
