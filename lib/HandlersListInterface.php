@@ -2,10 +2,8 @@
 
 namespace Flying\HandlersList;
 
-use Flying\HandlersList\Handler\HandlerInterface;
-
 /**
- * Interface for object builder handlers lists
+ * Interface for generic list of handlers
  */
 interface HandlersListInterface extends \Countable, \Iterator
 {
@@ -19,68 +17,55 @@ interface HandlersListInterface extends \Countable, \Iterator
 
     /**
      * Checks if there is any handlers in list
-     *
-     * @return boolean
      */
     public function isEmpty(): bool;
 
     /**
      * Checks whether given handler is available into list
-     *
-     * @param HandlerInterface $handler
-     * @return boolean
      */
-    public function contains(HandlerInterface $handler): bool;
+    public function contains(object $handler): bool;
 
     /**
      * Filter list of handlers using given test function
      *
-     * @param callable $test Test function should accept HandlerInterface as single argument and return boolean
-     * @return HandlerInterface[]
+     * @param callable $test Test function should accept object as single argument and return boolean
+     * @return object[]
      */
     public function filter(callable $test): array;
 
     /**
      * Find handler by reducing list of available handlers using given test function
      *
-     * @param callable $test Test function should accept HandlerInterface as single argument and return boolean
-     * @return HandlerInterface|null
+     * @param callable $test Test function should accept object as single argument and return boolean
+     * @return object|null
      */
-    public function find(callable $test): ?HandlerInterface;
+    public function find(callable $test): ?object;
 
     /**
-     * @param HandlerInterface[] $handlers
-     * @return HandlersListInterface
+     * Replace current list of handlers with given handlers
+     *
+     * @param iterable<object> $handlers
+     * @return static
      */
-    public function set(array $handlers): HandlersListInterface;
+    public function set(iterable $handlers): self;
 
     /**
      * Add given handler to the list
-     *
-     * @param HandlerInterface $handler
-     * @return HandlersListInterface
      */
-    public function add(HandlerInterface $handler): HandlersListInterface;
+    public function add(object $handler): self;
 
     /**
      * Removes the specified handler from list
-     *
-     * @param HandlerInterface $handler
-     * @return HandlersListInterface
      */
-    public function remove(HandlerInterface $handler): HandlersListInterface;
+    public function remove(object $handler): self;
 
     /**
      * Remove all handlers from the list
-     *
-     * @return HandlersListInterface
      */
-    public function clear(): HandlersListInterface;
+    public function clear(): self;
 
     /**
      * Get list of handlers as associative array
-     *
-     * @return array
      */
     public function toArray(): array;
 }

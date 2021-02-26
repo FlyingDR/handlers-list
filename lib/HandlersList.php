@@ -3,51 +3,46 @@
 namespace Flying\HandlersList;
 
 use Flying\HandlersList\Exception\InvalidHandlerException;
-use Flying\HandlersList\Handler\HandlerInterface;
+use Flying\HandlersList\Exception\InvalidHandlerInterfaceException;
 use Flying\HandlersList\Handler\PrioritizedHandlerInterface;
 
 class HandlersList implements HandlersListInterface
 {
     /**
-     * @var HandlerInterface[]
+     * @var object[]
      */
     private array $handlers;
-    /**
-     * @var string
-     */
-    private string $interface;
-    /**
-     * @var int
-     */
+    private ?string $interface = null;
     private int $count = 0;
-    /**
-     * @var int
-     */
     private int $index = 0;
 
     /**
-     * @param HandlerInterface[] $handlers
-     * @param string|null $interface
+     * @param iterable<object> $handlers
      * @throws InvalidHandlerException
      */
-    public function __construct(array $handlers = [], ?string $interface = HandlerInterface::class)
+    public function __construct(iterable $handlers = [], ?string $interface = null)
     {
-        $this->interface = $interface ?? HandlerInterface::class;
+        if (\is_string($interface)) {
+            try {
+                new \ReflectionClass($interface);
+            } catch (\ReflectionException $e) {
+                throw new InvalidHandlerInterfaceException(sprintf('Given handler interface "%s" does not exists', $interface));
+            }
+            $this->interface = $interface;
+        }
         $this->set($handlers);
     }
 
-    /**
-     * Test if this handlers list will accept instances of given class
-     *
-     * @param object|string $class
-     * @return bool
-     */
     public function accepts($class): bool
     {
         if (\is_object($class)) {
-            return \is_a($class, $this->interface, true);
+            return $this->interface ? \is_a($class, $this->interface, true) : true;
         }
-        if (\is_string($class)) {
+
+        if (\is_string($class) && \class_exists($class)) {
+            if ($this->interface === null) {
+                return true;
+            }
             try {
                 return (new \ReflectionClass($class))->implementsInterface($this->interface);
             } catch (\ReflectionException $e) {
@@ -58,32 +53,18 @@ class HandlersList implements HandlersListInterface
         return false;
     }
 
-    /**
-     * Checks if there is any handlers in list
-     *
-     * @return boolean
-     */
     public function isEmpty(): bool
     {
         return empty($this->handlers);
     }
 
-    /**
-     * Checks whether given handler is available into list
-     *
-     * @param HandlerInterface $handler
-     * @return boolean
-     */
-    public function contains(HandlerInterface $handler): bool
+    public function contains(object $handler): bool
     {
         return \in_array($handler, $this->handlers, true);
     }
 
     /**
-     * Filter list of handlers using given test function
-     *
-     * @param callable $test Test function should accept HandlerInterface as single argument and return boolean
-     * @return HandlerInterface[]
+     * @return object[]
      */
     public function filter(callable $test): array
     {
@@ -93,38 +74,28 @@ class HandlersList implements HandlersListInterface
     /**
      * Find handler by reducing list of available handlers using given test function
      *
-     * @param callable $test Test function should accept HandlerInterface as single argument and return boolean
-     * @return HandlerInterface|null
+     * @param callable $test Test function should accept object as single argument and return boolean
+     * @return object|null
      */
-    public function find(callable $test): ?HandlerInterface
+    public function find(callable $test): ?object
     {
         return array_reduce(
             $this->handlers,
-            fn(?HandlerInterface $found, HandlerInterface $current) => $found ?? ($test($current) ? $current : null)
+            fn(?object $found, object $current) => $found ?? ($test($current) ? $current : null)
         );
     }
 
-    /**
-     * @param HandlerInterface[] $handlers
-     * @return HandlersListInterface
-     */
-    public function set(array $handlers): HandlersListInterface
+    public function set(iterable $handlers): self
     {
+        /** @noinspection PhpParamsInspection */
         $this->handlers = array_map(function ($h) {
             return $this->validate($h);
-        }, $handlers);
+        }, is_array($handlers) ? $handlers : iterator_to_array($handlers, false));
         $this->update();
         return $this;
     }
 
-    /**
-     * Add given handler to the list
-     *
-     * @param HandlerInterface $handler
-     * @return HandlersListInterface
-     * @throws InvalidHandlerException
-     */
-    public function add(HandlerInterface $handler): HandlersListInterface
+    public function add(object $handler): self
     {
         if (!$this->contains($handler)) {
             $this->handlers[] = $this->validate($handler);
@@ -133,86 +104,50 @@ class HandlersList implements HandlersListInterface
         return $this;
     }
 
-    /**
-     * Removes the specified handler from list
-     *
-     * @param HandlerInterface $handler
-     * @return HandlersListInterface
-     */
-    public function remove(HandlerInterface $handler): HandlersListInterface
+    public function remove(object $handler): self
     {
-        $this->handlers = array_filter($this->handlers, fn(HandlerInterface $h) => $h !== $handler);
+        $this->handlers = array_filter($this->handlers, fn(object $h) => $h !== $handler);
         $this->update();
         return $this;
     }
 
-    /**
-     * Remove all handlers from the list
-     *
-     * @return HandlersListInterface
-     */
-    public function clear(): HandlersListInterface
+    public function clear(): self
     {
         $this->handlers = [];
         $this->update();
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function toArray(): array
     {
         return $this->handlers;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function count(): int
     {
         return \count($this->handlers);
     }
 
-    /**
-     * {@inheritdoc}
-     * @return HandlerInterface
-     */
-    public function current(): HandlerInterface
+    public function current(): object
     {
         return $this->handlers[$this->index];
     }
 
-    /**
-     * {@inheritdoc}
-     * @return int
-     */
     public function key(): int
     {
         return $this->index;
     }
 
-    /**
-     * {@inheritdoc}
-     * @return void
-     */
     public function next(): void
     {
         $this->index++;
     }
 
-    /**
-     * {@inheritdoc}
-     * @return boolean
-     */
     public function valid(): bool
     {
         return $this->index < $this->count;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function rewind(): void
     {
         $this->index = 0;
@@ -220,20 +155,23 @@ class HandlersList implements HandlersListInterface
 
     /**
      * @param mixed $handler
-     * @return HandlerInterface
+     * @return object
      * @throws InvalidHandlerException
      */
-    protected function validate($handler): HandlerInterface
+    protected function validate($handler): object
     {
-        if (!\is_object($handler) || !is_subclass_of($handler, $this->interface)) {
-            $interface = $this->interface;
-            try {
-                $interface = (new \ReflectionClass($this->interface))->getShortName();
-            } catch (\ReflectionException $e) {
-
-            }
-            throw new InvalidHandlerException(sprintf('Handler should implement "%s" interface', $interface));
+        if (!is_object($handler)) {
+            throw new InvalidHandlerException(sprintf('Handler should be an object, "%s" given instead', gettype($handler)));
         }
+
+        if ($this->interface === null) {
+            return $handler;
+        }
+
+        if (!is_subclass_of($handler, $this->interface)) {
+            throw new InvalidHandlerException(sprintf('Handler "%s" should implement "%s" interface', get_class($handler), $this->interface));
+        }
+
         return $handler;
     }
 

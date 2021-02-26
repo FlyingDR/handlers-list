@@ -3,6 +3,7 @@
 namespace Flying\HandlersList\Tests;
 
 use Flying\HandlersList\Exception\InvalidHandlerException;
+use Flying\HandlersList\Exception\InvalidHandlerInterfaceException;
 use Flying\HandlersList\HandlersList;
 use Flying\HandlersList\Tests\Fixtures\A;
 use Flying\HandlersList\Tests\Fixtures\AInterface;
@@ -16,6 +17,39 @@ use Prophecy\PhpUnit\ProphecyTrait;
 class HandlersListTest extends TestCase
 {
     use ProphecyTrait;
+
+    /**
+     * @dataProvider dpIterables
+     */
+    public function testAllowPassingIterablesIntoConstructor(iterable $items): void
+    {
+        $this->expectNotToPerformAssertions();
+        new HandlersList($items);
+    }
+
+    public function dpIterables(): array
+    {
+        return [
+            [
+                [],
+            ],
+            [
+                [new A()],
+            ],
+            [
+                [new A(), new B()],
+            ],
+            [
+                new \ArrayIterator([new A(), new B()]),
+            ],
+            [
+                (static function (): \Generator {
+                    yield new A();
+                    yield new B();
+                })(),
+            ],
+        ];
+    }
 
     /**
      * @dataProvider dpItems
@@ -63,6 +97,12 @@ class HandlersListTest extends TestCase
                 true,
             ],
         ];
+    }
+
+    public function testInvalidInterfaceShouldNotBeAccepted(): void
+    {
+        $this->expectException(InvalidHandlerInterfaceException::class);
+        new HandlersList([new A()], 'unavailable interface');
     }
 
     /**

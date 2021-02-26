@@ -5,7 +5,7 @@ namespace Flying\HandlersList\Handler;
 /**
  * Interface for handlers that needs to define their priority among other handlers
  */
-interface PrioritizedHandlerInterface extends HandlerInterface
+interface PrioritizedHandlerInterface
 {
     /**
      * Get priority of this handler
