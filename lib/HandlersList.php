@@ -170,8 +170,8 @@ class HandlersList implements HandlersListInterface
             return $handler;
         }
 
-        if (!is_subclass_of($handler, $this->interface)) {
-            throw new InvalidHandlerException(sprintf('Handler "%s" should implement "%s" interface', get_class($handler), $this->interface));
+        if (!is_a($handler, $this->interface)) {
+            throw new InvalidHandlerException(sprintf('Handler "%s" should be instance of "%s"', get_class($handler), $this->interface));
         }
 
         return $handler;

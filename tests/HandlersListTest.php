@@ -10,6 +10,7 @@ use Flying\HandlersList\Tests\Fixtures\AInterface;
 use Flying\HandlersList\Tests\Fixtures\B;
 use Flying\HandlersList\Tests\Fixtures\BInterface;
 use Flying\HandlersList\Tests\Fixtures\C;
+use Flying\HandlersList\Tests\Fixtures\D;
 use Flying\HandlersList\Tests\Fixtures\PrioritizedHandler;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
@@ -92,6 +93,11 @@ class HandlersListTest extends TestCase
                 true,
             ],
             [
+                [new A(), new D()],
+                A::class,
+                false,
+            ],
+            [
                 [true, false, 123, 'abc'],
                 null,
                 true,
@@ -154,6 +160,16 @@ class HandlersListTest extends TestCase
                 AInterface::class,
                 new B(),
                 false,
+            ],
+            [
+                A::class,
+                new A(),
+                true,
+            ],
+            [
+                A::class,
+                new D(),
+                true,
             ],
             [
                 null,
