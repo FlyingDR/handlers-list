@@ -120,6 +120,11 @@ class HandlersList implements HandlersListInterface
         return $this;
     }
 
+    public function getInterface(): ?string
+    {
+        return $this->interface;
+    }
+
     public function toArray(): array
     {
         return $this->handlers;

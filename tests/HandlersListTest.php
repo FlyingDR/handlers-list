@@ -313,4 +313,13 @@ class HandlersListTest extends TestCase
         self::assertTrue($list->contains($item));
         self::assertSame($item, $list->toArray()[0]);
     }
+
+    public function testInterfaceConstraintRetrieval() : void
+    {
+        $list = new HandlersList();
+        self::assertNull($list->getInterface());
+
+        $list = new HandlersList([], A::class);
+        self::assertSame(A::class, $list->getInterface());
+    }
 }
