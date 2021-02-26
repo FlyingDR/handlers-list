@@ -65,9 +65,9 @@ interface HandlersListInterface extends \Countable, \IteratorAggregate
     public function clear(): self;
 
     /**
-     * Get interface constraint for handlers into list
+     * Get class constraint for handlers into list
      */
-    public function getInterface(): ?string;
+    public function getConstraint(): ?string;
 
     /**
      * Get list of handlers as associative array

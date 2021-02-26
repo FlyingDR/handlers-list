@@ -3,7 +3,7 @@
 namespace Flying\HandlersList\Tests;
 
 use Flying\HandlersList\Exception\InvalidHandlerException;
-use Flying\HandlersList\Exception\InvalidHandlerInterfaceException;
+use Flying\HandlersList\Exception\InvalidHandlerConstraintException;
 use Flying\HandlersList\HandlersList;
 use Flying\HandlersList\Tests\Fixtures\A;
 use Flying\HandlersList\Tests\Fixtures\AInterface;
@@ -107,7 +107,7 @@ abstract class BaseHandlersListTest extends TestCase
 
     public function testInvalidInterfaceShouldNotBeAccepted(): void
     {
-        $this->expectException(InvalidHandlerInterfaceException::class);
+        $this->expectException(InvalidHandlerConstraintException::class);
         new HandlersList([new A()], 'unavailable interface');
     }
 
@@ -317,9 +317,9 @@ abstract class BaseHandlersListTest extends TestCase
     public function testInterfaceConstraintRetrieval() : void
     {
         $list = new HandlersList();
-        self::assertNull($list->getInterface());
+        self::assertNull($list->getConstraint());
 
         $list = new HandlersList([], A::class);
-        self::assertSame(A::class, $list->getInterface());
+        self::assertSame(A::class, $list->getConstraint());
     }
 }

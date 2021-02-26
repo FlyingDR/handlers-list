@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Flying\HandlersList;
 
 use Flying\HandlersList\Exception\InvalidHandlerException;
-use Flying\HandlersList\Exception\InvalidHandlerInterfaceException;
+use Flying\HandlersList\Exception\InvalidHandlerConstraintException;
 use Flying\HandlersList\Handler\PrioritizedHandlerInterface;
 
 class HandlersList implements HandlersListInterface
@@ -14,15 +14,15 @@ class HandlersList implements HandlersListInterface
      * @var object[]
      */
     private array $handlers;
-    private ?string $interface = null;
+    private ?string $constraint = null;
 
     /**
      * @param iterable<object> $handlers
      * @throws InvalidHandlerException
      */
-    public function __construct(iterable $handlers = [], ?string $interface = null)
+    public function __construct(iterable $handlers = [], ?string $constraint = null)
     {
-        $this->setInterface($interface);
+        $this->setConstraint($constraint);
         $this->store($handlers);
         $this->update();
     }
@@ -30,15 +30,15 @@ class HandlersList implements HandlersListInterface
     public function accepts($class): bool
     {
         if (\is_object($class)) {
-            return $this->interface ? \is_a($class, $this->interface, true) : true;
+            return $this->constraint ? \is_a($class, $this->constraint, true) : true;
         }
 
         if (\is_string($class) && \class_exists($class)) {
-            if ($this->interface === null) {
+            if ($this->constraint === null) {
                 return true;
             }
             try {
-                return (new \ReflectionClass($class))->implementsInterface($this->interface);
+                return (new \ReflectionClass($class))->implementsInterface($this->constraint);
             } catch (\ReflectionException $e) {
                 return false;
             }
@@ -109,9 +109,9 @@ class HandlersList implements HandlersListInterface
         return $this;
     }
 
-    public function getInterface(): ?string
+    public function getConstraint(): ?string
     {
-        return $this->interface;
+        return $this->constraint;
     }
 
     public function toArray(): array
@@ -129,17 +129,17 @@ class HandlersList implements HandlersListInterface
         return \count($this->handlers);
     }
 
-    protected function setInterface(?string $interface): void
+    protected function setConstraint(?string $constraint): void
     {
-        if (\is_string($interface)) {
+        if (\is_string($constraint)) {
             try {
-                new \ReflectionClass($interface);
+                new \ReflectionClass($constraint);
             } catch (\ReflectionException $e) {
-                throw new InvalidHandlerInterfaceException(sprintf('Given handler interface "%s" does not exists', $interface));
+                throw new InvalidHandlerConstraintException(sprintf('Given handler class constraint "%s" does not exists', $constraint));
             }
         }
 
-        $this->interface = $interface;
+        $this->constraint = $constraint;
     }
 
     protected function store(iterable $handlers): void
@@ -161,12 +161,12 @@ class HandlersList implements HandlersListInterface
             throw new InvalidHandlerException(sprintf('Handler should be an object, "%s" given instead', gettype($handler)));
         }
 
-        if ($this->interface === null) {
+        if ($this->constraint === null) {
             return $handler;
         }
 
-        if (!is_a($handler, $this->interface)) {
-            throw new InvalidHandlerException(sprintf('Handler "%s" should be instance of "%s"', get_class($handler), $this->interface));
+        if (!is_a($handler, $this->constraint)) {
+            throw new InvalidHandlerException(sprintf('Handler "%s" should be instance of "%s"', get_class($handler), $this->constraint));
         }
 
         return $handler;
