@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Flying\HandlersList;
 
 use Flying\HandlersList\Exception\InvalidHandlerException;
