@@ -1,6 +1,6 @@
 # Generic list of arbitrary handlers
 
-[![Build Status](https://travis-ci.org/FlyingDR/handlers-list.svg?branch=master)](https://travis-ci.org/FlyingDR/handlers-list)
+[![Build Status](https://travis-ci.org/FlyingDR/handlers-list.svg?branch=master)](https://travis-ci.org/FlyingDR/handlers-list) [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/FlyingDR/handlers-list/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/FlyingDR/handlers-list/?branch=master) [![Code Coverage](https://scrutinizer-ci.com/g/FlyingDR/handlers-list/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/FlyingDR/handlers-list/?branch=master)
 
 This very simple library provides implementation of generic list of arbitrary handlers. 
 
