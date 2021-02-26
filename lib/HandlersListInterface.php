@@ -5,7 +5,7 @@ namespace Flying\HandlersList;
 /**
  * Interface for generic list of handlers
  */
-interface HandlersListInterface extends \Countable, \Iterator
+interface HandlersListInterface extends \Countable, \IteratorAggregate
 {
     /**
      * Test if this handlers list will accept instances of given class

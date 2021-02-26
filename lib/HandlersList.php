@@ -15,8 +15,6 @@ class HandlersList implements HandlersListInterface
      */
     private array $handlers;
     private ?string $interface = null;
-    private int $count = 0;
-    private int $index = 0;
 
     /**
      * @param iterable<object> $handlers
@@ -130,34 +128,14 @@ class HandlersList implements HandlersListInterface
         return $this->handlers;
     }
 
+    public function getIterator(): \Iterator
+    {
+        return new \ArrayIterator($this->handlers);
+    }
+
     public function count(): int
     {
         return \count($this->handlers);
-    }
-
-    public function current(): object
-    {
-        return $this->handlers[$this->index];
-    }
-
-    public function key(): int
-    {
-        return $this->index;
-    }
-
-    public function next(): void
-    {
-        $this->index++;
-    }
-
-    public function valid(): bool
-    {
-        return $this->index < $this->count;
-    }
-
-    public function rewind(): void
-    {
-        $this->index = 0;
     }
 
     /**
@@ -198,7 +176,5 @@ class HandlersList implements HandlersListInterface
             }
             return 0;
         });
-        $this->count = $this->count();
-        $this->index = 0;
     }
 }
