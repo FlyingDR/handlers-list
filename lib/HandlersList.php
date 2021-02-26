@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace Flying\HandlersList;
 
-use Flying\HandlersList\Exception\InvalidHandlerException;
 use Flying\HandlersList\Exception\InvalidHandlerConstraintException;
-use Flying\HandlersList\Handler\PrioritizedHandlerInterface;
+use Flying\HandlersList\Exception\InvalidHandlerException;
 
 class HandlersList implements HandlersListInterface
 {

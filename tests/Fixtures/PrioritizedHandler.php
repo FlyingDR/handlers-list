@@ -2,7 +2,7 @@
 
 namespace Flying\HandlersList\Tests\Fixtures;
 
-use Flying\HandlersList\Handler\PrioritizedHandlerInterface;
+use Flying\HandlersList\PrioritizedHandlerInterface;
 
 class PrioritizedHandler implements PrioritizedHandlerInterface
 {

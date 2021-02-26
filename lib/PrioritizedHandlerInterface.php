@@ -1,6 +1,6 @@
 <?php
 
-namespace Flying\HandlersList\Handler;
+namespace Flying\HandlersList;
 
 /**
  * Interface for handlers that needs to define their priority among other handlers
