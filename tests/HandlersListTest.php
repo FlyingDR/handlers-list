@@ -1,6 +1,6 @@
 <?php
 
-namespace Flying\HandlersList\Tests\Registry;
+namespace Flying\HandlersList\Tests;
 
 use Flying\HandlersList\Exception\InvalidHandlerException;
 use Flying\HandlersList\HandlersList;
@@ -11,22 +11,22 @@ use Flying\HandlersList\Tests\Fixtures\BInterface;
 use Flying\HandlersList\Tests\Fixtures\C;
 use Flying\HandlersList\Tests\Fixtures\PrioritizedHandler;
 use PHPUnit\Framework\TestCase;
+use Prophecy\PhpUnit\ProphecyTrait;
 
 class HandlersListTest extends TestCase
 {
+    use ProphecyTrait;
+
     /**
-     * @param array $items
-     * @param string $interface
-     * @param boolean $shouldFail
      * @dataProvider dpItems
      */
-    public function testItemsPassedInConstructorShouldBeValidatedAgainstInterface($items, $interface, $shouldFail): void
+    public function testItemsPassedInConstructorShouldBeValidatedAgainstInterface(array $items, ?string $interface, bool $shouldFail): void
     {
         if ($shouldFail) {
             $this->expectException(InvalidHandlerException::class);
         }
         $list = new HandlersList($items, $interface);
-        $this->assertSame($items, $list->toArray());
+        self::assertSame($items, $list->toArray());
     }
 
     public function dpItems(): array
@@ -66,17 +66,16 @@ class HandlersListTest extends TestCase
     }
 
     /**
-     * @param string $interface
-     * @param string $class
-     * @param boolean $acceptable
+     * @param string|null $interface
+     * @param string|object|null $class
+     * @param bool $acceptable
      * @dataProvider acceptanceItems
      */
-    public function testClassAcceptance($interface, $class, $acceptable): void
+    public function testClassAcceptance(?string $interface, $class, bool $acceptable): void
     {
         $list = new HandlersList([], $interface);
-        $this->assertEquals($acceptable, $list->accepts($class));
+        self::assertEquals($acceptable, $list->accepts($class));
     }
-
 
     public function acceptanceItems(): array
     {
@@ -152,62 +151,54 @@ class HandlersListTest extends TestCase
     public function testListManipulations(): void
     {
         $list = new HandlersList();
-        $this->assertTrue($list->isEmpty());
-        $this->assertEquals(0, $list->count());
-        $this->assertEquals([], $list->toArray());
+        self::assertTrue($list->isEmpty());
+        self::assertEquals(0, $list->count());
+        self::assertEquals([], $list->toArray());
 
         $a = new A();
         $b = new B();
         $items = [$a, $b];
         $list->set($items);
-        $this->assertFalse($list->isEmpty());
-        $this->assertEquals(2, $list->count());
-        $this->assertEquals($items, $list->toArray());
+        self::assertFalse($list->isEmpty());
+        self::assertEquals(2, $list->count());
+        self::assertEquals($items, $list->toArray());
 
         $c = new C();
-        $this->assertTrue($list->contains($items[0]));
-        $this->assertFalse($list->contains($c));
+        self::assertTrue($list->contains($items[0]));
+        self::assertFalse($list->contains($c));
 
         $list->remove($c);
-        $this->assertEquals(2, $list->count());
-        $this->assertTrue($list->contains($items[0]));
-        $this->assertTrue($list->contains($items[1]));
+        self::assertEquals(2, $list->count());
+        self::assertTrue($list->contains($items[0]));
+        self::assertTrue($list->contains($items[1]));
 
         $list->add($c);
-        $this->assertEquals(3, $list->count());
-        $this->assertTrue($list->contains($c));
+        self::assertEquals(3, $list->count());
+        self::assertTrue($list->contains($c));
 
         $list->remove($items[0]);
-        $this->assertEquals(2, $list->count());
-        $this->assertFalse($list->contains($items[0]));
+        self::assertEquals(2, $list->count());
+        self::assertFalse($list->contains($items[0]));
 
         $list->clear();
-        $this->assertTrue($list->isEmpty());
-        $this->assertEquals(0, $list->count());
-        $this->assertEquals([], $list->toArray());
+        self::assertTrue($list->isEmpty());
+        self::assertEquals(0, $list->count());
+        self::assertEquals([], $list->toArray());
 
         $list->set([$a, $b, $c]);
-        $test1 = function ($h) {
-            return $h instanceof A;
-        };
-        $test2 = function ($h) {
-            return $h instanceof B || $h instanceof C;
-        };
-        $test3 = function () {
-            return true;
-        };
-        $test4 = function () {
-            return false;
-        };
-        $this->assertEquals([$a], $list->filter($test1));
-        $this->assertEquals([$b, $c], $list->filter($test2));
-        $this->assertEquals([$a, $b, $c], $list->filter($test3));
-        $this->assertEquals([], $list->filter($test4));
+        $test1 = static fn($h) => $h instanceof A;
+        $test2 = static fn($h) => $h instanceof B || $h instanceof C;
+        $test3 = static fn() => true;
+        $test4 = static fn() => false;
+        self::assertEquals([$a], $list->filter($test1));
+        self::assertEquals([$b, $c], $list->filter($test2));
+        self::assertEquals([$a, $b, $c], $list->filter($test3));
+        self::assertEquals([], $list->filter($test4));
 
-        $this->assertEquals($a, $list->find($test1));
-        $this->assertEquals($b, $list->find($test2));
-        $this->assertEquals($a, $list->find($test3));
-        $this->assertEquals(null, $list->find($test4));
+        self::assertEquals($a, $list->find($test1));
+        self::assertEquals($b, $list->find($test2));
+        self::assertEquals($a, $list->find($test3));
+        self::assertEquals(null, $list->find($test4));
     }
 
     public function testListIsIterable(): void
@@ -220,20 +211,18 @@ class HandlersListTest extends TestCase
         $list = new HandlersList($items);
         $index = 0;
         foreach ($list as $item) {
-            $this->assertSame($items[$index++], $item);
+            self::assertSame($items[$index++], $item);
         }
     }
 
     public function testListItemsAreSortedByPriorityIfPossible(): void
     {
         $h1 = $this->prophesize(PrioritizedHandler::class);
-        /** @noinspection PhpUndefinedMethodInspection */
         $h1
             ->getHandlerPriority()
             ->shouldBeCalled()
             ->willReturn(0);
         $h2 = $this->prophesize(PrioritizedHandler::class);
-        /** @noinspection PhpUndefinedMethodInspection */
         $h2
             ->getHandlerPriority()
             ->shouldBeCalled()
@@ -247,11 +236,11 @@ class HandlersListTest extends TestCase
             $h2->reveal(),
             $h1->reveal(),
         ];
-        $this->assertSame($expected, $list->toArray());
+        self::assertSame($expected, $list->toArray());
 
         $index = 0;
         foreach ($list as $item) {
-            $this->assertSame($expected[$index++], $item);
+            self::assertSame($expected[$index++], $item);
         }
     }
 
@@ -263,9 +252,9 @@ class HandlersListTest extends TestCase
         $list->add($item);
         $list->add($item);
 
-        $this->assertFalse($list->isEmpty());
-        $this->assertEquals(1, $list->count());
-        $this->assertTrue($list->contains($item));
-        $this->assertSame($item, $list->toArray()[0]);
+        self::assertFalse($list->isEmpty());
+        self::assertEquals(1, $list->count());
+        self::assertTrue($list->contains($item));
+        self::assertSame($item, $list->toArray()[0]);
     }
 }

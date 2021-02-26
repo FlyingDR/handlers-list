@@ -15,9 +15,10 @@
         }
     },
     "require": {
-        "php": ">=7.1"
+        "php": "^7.4|^8.0"
     },
     "require-dev": {
-        "phpunit/phpunit": "^6.4"
+        "phpunit/phpunit": "^9.0",
+        "phpspec/prophecy-phpunit": "^2.0"
     }
 }

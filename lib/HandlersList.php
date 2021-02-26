@@ -11,19 +11,19 @@ class HandlersList implements HandlersListInterface
     /**
      * @var HandlerInterface[]
      */
-    private $handlers;
+    private array $handlers;
     /**
      * @var string
      */
-    private $interface;
+    private string $interface;
     /**
      * @var int
      */
-    private $count = 0;
+    private int $count = 0;
     /**
      * @var int
      */
-    private $index = 0;
+    private int $index = 0;
 
     /**
      * @param HandlerInterface[] $handlers
@@ -98,12 +98,10 @@ class HandlersList implements HandlersListInterface
      */
     public function find(callable $test): ?HandlerInterface
     {
-        return array_reduce($this->handlers, function ($found, $current) use ($test) {
-            if ($found !== null) {
-                return $found;
-            }
-            return $test($current) ? $current : null;
-        });
+        return array_reduce(
+            $this->handlers,
+            fn(?HandlerInterface $found, HandlerInterface $current) => $found ?? ($test($current) ? $current : null)
+        );
     }
 
     /**
@@ -143,9 +141,7 @@ class HandlersList implements HandlersListInterface
      */
     public function remove(HandlerInterface $handler): HandlersListInterface
     {
-        $this->handlers = array_filter($this->handlers, function ($h) use ($handler) {
-            return $h !== $handler;
-        });
+        $this->handlers = array_filter($this->handlers, fn(HandlerInterface $h) => $h !== $handler);
         $this->update();
         return $this;
     }
@@ -232,8 +228,7 @@ class HandlersList implements HandlersListInterface
         if (!\is_object($handler) || !is_subclass_of($handler, $this->interface)) {
             $interface = $this->interface;
             try {
-                $reflection = new \ReflectionClass($this->interface);
-                $interface = $reflection->getShortName();
+                $interface = (new \ReflectionClass($this->interface))->getShortName();
             } catch (\ReflectionException $e) {
 
             }
@@ -247,7 +242,7 @@ class HandlersList implements HandlersListInterface
      */
     protected function update(): void
     {
-        usort($this->handlers, function ($a, $b) {
+        usort($this->handlers, static function ($a, $b) {
             $ap = $a instanceof PrioritizedHandlerInterface ? $a->getHandlerPriority() : 0;
             $bp = $b instanceof PrioritizedHandlerInterface ? $b->getHandlerPriority() : 0;
             if ($ap > $bp) {
