@@ -22,15 +22,9 @@ class HandlersList implements HandlersListInterface
      */
     public function __construct(iterable $handlers = [], ?string $interface = null)
     {
-        if (\is_string($interface)) {
-            try {
-                new \ReflectionClass($interface);
-            } catch (\ReflectionException $e) {
-                throw new InvalidHandlerInterfaceException(sprintf('Given handler interface "%s" does not exists', $interface));
-            }
-            $this->interface = $interface;
-        }
-        $this->set($handlers);
+        $this->setInterface($interface);
+        $this->store($handlers);
+        $this->update();
     }
 
     public function accepts($class): bool
@@ -87,10 +81,7 @@ class HandlersList implements HandlersListInterface
 
     public function set(iterable $handlers): self
     {
-        /** @noinspection PhpParamsInspection */
-        $this->handlers = array_map(function ($h) {
-            return $this->validate($h);
-        }, is_array($handlers) ? $handlers : iterator_to_array($handlers, false));
+        $this->store($handlers);
         $this->update();
         return $this;
     }
@@ -136,6 +127,27 @@ class HandlersList implements HandlersListInterface
     public function count(): int
     {
         return \count($this->handlers);
+    }
+
+    protected function setInterface(?string $interface): void
+    {
+        if (\is_string($interface)) {
+            try {
+                new \ReflectionClass($interface);
+            } catch (\ReflectionException $e) {
+                throw new InvalidHandlerInterfaceException(sprintf('Given handler interface "%s" does not exists', $interface));
+            }
+        }
+
+        $this->interface = $interface;
+    }
+
+    protected function store(iterable $handlers): void
+    {
+        /** @noinspection PhpParamsInspection */
+        $this->handlers = array_map(function ($h) {
+            return $this->validate($h);
+        }, is_array($handlers) ? $handlers : iterator_to_array($handlers, false));
     }
 
     /**
