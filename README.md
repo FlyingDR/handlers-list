@@ -1,5 +1,7 @@
 # Generic list of arbitrary handlers
 
+[![Build Status](https://travis-ci.org/FlyingDR/handlers-list.svg?branch=master)](https://travis-ci.org/FlyingDR/handlers-list)
+
 This very simple library provides implementation of generic list of arbitrary handlers. 
 
 Its primary goal is to simplify process of organizing multiple related objects into iterable list of handlers with: 
