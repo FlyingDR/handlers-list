@@ -144,7 +144,7 @@ class HandlersList implements HandlersListInterface
     protected function store(iterable $handlers): void
     {
         /** @noinspection PhpParamsInspection */
-        $this->handlers = array_map(function ($h) {
+        $this->handlers = array_map(function($h) {
             return $this->validate($h);
         }, is_array($handlers) ? $handlers : iterator_to_array($handlers, false));
     }
@@ -176,7 +176,7 @@ class HandlersList implements HandlersListInterface
      */
     protected function update(): void
     {
-        usort($this->handlers, static function ($a, $b) {
+        usort($this->handlers, static function($a, $b) {
             $ap = $a instanceof PrioritizedHandlerInterface ? $a->getHandlerPriority() : 0;
             $bp = $b instanceof PrioritizedHandlerInterface ? $b->getHandlerPriority() : 0;
             if ($ap > $bp) {
